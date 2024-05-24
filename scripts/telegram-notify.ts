@@ -7,6 +7,7 @@ import { downloadFile } from "./utils/download";
 import path from "path";
 import { TEMP_DIR } from "./utils/env";
 import { GIT_SHORT_HASH } from "./utils/shell";
+import { existsSync } from "fs";
 
 const nightlyBuild = process.argv.includes("--nightly");
 
@@ -76,7 +77,18 @@ const isValidFormat = (fileName: string): boolean => {
     }
   });
 
-  await Promise.all(downloadTasks);
+  consola.log(downloadTasks);
+
+  try {
+    await Promise.all(downloadTasks);
+  } catch (error) {
+    consola.error(error);
+    throw new Error("Error during download or upload tasks");
+  }
+
+  reourceMappping.forEach((item) => {
+    consola.log(`exited ${item}:`, existsSync(item));
+  });
 
   consola.start("Staring upload tasks (nightly)");
 
